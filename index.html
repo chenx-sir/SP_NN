@@ -558,84 +558,93 @@
                     其中 \( J \) 是相邻自旋之间的耦合强度，\( B \) 是外磁场，\( \sigma_i = \pm 1 \) 是第 \( i \) 个格点的自旋，边界条件为周期性边界条件 \( \sigma_{N+1} = \sigma_1 \)。
                 </p>
                 
-                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 重整化群变换的具体步骤</h4>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    对于一维伊辛模型，我们采用实空间重整化群方法，具体步骤如下：
-                </p>
-                <ol class="list-decimal list-inside space-y-3 text-gray-700 mb-6">
-                    <li><strong>粗粒化</strong>：将一维链划分为块，每个块包含两个相邻的自旋 \( (\sigma_{2i-1}, \sigma_{2i}) \)。</li>
-                    <li><strong>块自旋定义</strong>：定义新的块自旋变量 \( \tau_i = \sigma_{2i-1} \cdot \sigma_{2i} \)，表示块内自旋的相对取向。</li>
-                    <li><strong>积分掉快变量</strong>：对原始自旋变量求和，只保留块自旋变量。</li>
-                    <li><strong>重新标度</strong>：将系统长度重新标度为原来的一半，同时调整耦合常数。</li>
-                </ol>
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 重整化群变换的具体步骤与不动点分析</h4>
+                
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors flex justify-between items-center" onclick="toggleCollapsible('rg1DMath')">
+                    <span>点击展开重整化群变换与不动点分析的数学推导</span>
+                </button>
+                <div id="rg1DMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-6">
+                    <div class="py-4">
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对于一维伊辛模型，我们采用实空间重整化群方法，具体步骤如下：
+                        </p>
+                        <ol class="list-decimal list-inside space-y-3 text-gray-700 mb-6">
+                            <li><strong>粗粒化</strong>：将一维链划分为块，每个块包含两个相邻的自旋 \( (\sigma_{2i-1}, \sigma_{2i}) \)。</li>
+                            <li><strong>块自旋定义</strong>：定义新的块自旋变量 \( \tau_i = \sigma_{2i-1} \cdot \sigma_{2i} \)，表示块内自旋的相对取向。</li>
+                            <li><strong>积分掉快变量</strong>：对原始自旋变量求和，只保留块自旋变量。</li>
+                            <li><strong>重新标度</strong>：将系统长度重新标度为原来的一半，同时调整耦合常数。</li>
+                        </ol>
 
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    对于零外磁场（\( B = 0 \)）的情况，配分函数为：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ Z = \sum_{\{\sigma_i\}} \exp\left( K \sum_{i=1}^{N} \sigma_i \sigma_{i+1} \right) \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( K = \beta J = J/(k_B T) \) 是无量纲的耦合常数。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    现在，我们将自旋分为偶数位置和奇数位置，然后积分掉奇数位置的自旋。对于每个奇数位置的自旋 \( \sigma_{2i-1} \)，它与相邻的偶数位置自旋 \( \sigma_{2i-2} \) 和 \( \sigma_{2i} \) 相互作用。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    对奇数位置自旋的求和可以表示为：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \sum_{\sigma_{2i-1}=\pm 1} \exp\left[ K \sigma_{2i-1}(\sigma_{2i-2} + \sigma_{2i}) \right] \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    完成这个求和后，我们得到：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \exp\left[ K' \sigma_{2i-2} \sigma_{2i} \right] \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    通过比较两边的系数，我们可以得到重整化群变换的表达式：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ K' = \ln \cosh(2K) \]
-                    </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对于零外磁场（\( B = 0 \)）的情况，配分函数为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z = \sum_{\{\sigma_i\}} \exp\left( K \sum_{i=1}^{N} \sigma_i \sigma_{i+1} \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( K = \beta J = J/(k_B T) \) 是无量纲的耦合常数。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            现在，我们将自旋分为偶数位置和奇数位置，然后积分掉奇数位置的自旋。对于每个奇数位置的自旋 \( \sigma_{2i-1} \)，它与相邻的偶数位置自旋 \( \sigma_{2i-2} \) 和 \( \sigma_{2i} \) 相互作用。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对奇数位置自旋的求和可以表示为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma_{2i-1}=\pm 1} \exp\left[ K \sigma_{2i-1}(\sigma_{2i-2} + \sigma_{2i}) \right] \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            完成这个求和后，我们得到：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \exp\left[ K' \sigma_{2i-2} \sigma_{2i} \right] \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            通过比较两边的系数，我们可以得到重整化群变换的表达式：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ K' = \ln \cosh(2K) \]
+                            </p>
+                        </div>
+
+                        <h5 class="text-lg font-medium text-gray-800 mt-6 mb-3">重整化群不动点分析</h5>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            重整化群不动点是指在RG变换下保持不变的参数值，即满足 \( K^* = R(K^*) \)，其中 \( R \) 表示RG变换。对于一维伊辛模型，不动点满足：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ K^* = \ln \cosh(2K^*) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            我们可以通过分析函数 \( f(K) = \ln \cosh(2K) \) 和直线 \( y = K \) 的交点来确定不动点。
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ f(0) = \ln \cosh(0) = \ln(1) = 0 \]
+                                \[ f'(K) = \frac{2 \sinh(2K)}{\cosh(2K)} = 2 \tanh(2K) \]
+                                \[ f'(0) = 0 \]
+                                \[ \lim_{K \to \infty} f(K) = \lim_{K \to \infty} \ln \left( \frac{e^{2K} + e^{-2K}}{2} \right) \approx \lim_{K \to \infty} (2K - \ln 2) = \infty \]
+                                \[ \lim_{K \to \infty} f'(K) = 2 \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            由于 \( f'(0) = 0 < 1 \) 且 \( \lim_{K \to \infty} f'(K) = 2 > 1 \)，根据中间值定理，存在一个临界值 \( K_c \) 使得 \( f'(K_c) = 1 \)。然而，由于函数 \( f(K) \) 在 \( K > 0 \) 时始终位于直线 \( y = K \) 下方（可以通过泰勒展开验证），因此除了 \( K^* = 0 \) 之外，没有其他不动点。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            因此，一维伊辛模型的重整化群只有一个不动点 \( K^* = 0 \)，对应于无穷高温度的极限情况。
+                        </p>
+                    </div>
                 </div>
 
-                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 重整化群不动点分析</h4>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    重整化群不动点是指在RG变换下保持不变的参数值，即满足 \( K^* = R(K^*) \)，其中 \( R \) 表示RG变换。对于一维伊辛模型，不动点满足：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ K^* = \ln \cosh(2K^*) \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    我们可以通过分析函数 \( f(K) = \ln \cosh(2K) \) 和直线 \( y = K \) 的交点来确定不动点。
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ f(0) = \ln \cosh(0) = \ln(1) = 0 \]
-                        \[ f'(K) = \frac{2 \sinh(2K)}{\cosh(2K)} = 2 \tanh(2K) \]
-                        \[ f'(0) = 0 \]
-                        \[ \lim_{K \to \infty} f(K) = \lim_{K \to \infty} \ln \left( \frac{e^{2K} + e^{-2K}}{2} \right) \approx \lim_{K \to \infty} (2K - \ln 2) = \infty \]
-                        \[ \lim_{K \to \infty} f'(K) = 2 \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    由于 \( f'(0) = 0 < 1 \) 且 \( \lim_{K \to \infty} f'(K) = 2 > 1 \)，根据中间值定理，存在一个临界值 \( K_c \) 使得 \( f'(K_c) = 1 \)。然而，由于函数 \( f(K) \) 在 \( K > 0 \) 时始终位于直线 \( y = K \) 下方（可以通过泰勒展开验证），因此除了 \( K^* = 0 \) 之外，没有其他不动点。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    因此，一维伊辛模型的重整化群只有一个不动点 \( K^* = 0 \)，对应于无穷高温度的极限情况。
-
-                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 一维伊辛模型为何没有相变</h4>
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 一维伊辛模型为何没有相变</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     一维伊辛模型在零外磁场下没有相变，这一结论可以通过重整化群分析得到解释：
                 </p>
@@ -651,7 +660,7 @@
                     这一结果也符合Mermin-Wagner定理，该定理指出，在一维和二维系统中，对于具有连续对称性的系统，在有限温度下不存在长程有序。虽然伊辛模型具有离散对称性（Z₂对称性），但在一维情况下，热涨落仍然足够强，足以破坏任何长程有序。
                 </p>
 
-                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">4. 外磁场对一维伊辛模型的影响</h4>
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 外磁场对一维伊辛模型的影响</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     当存在外磁场 \( B \neq 0 \) 时，一维伊辛模型的重整化群变换变得更加复杂，需要考虑磁场的影响：
                 </p>
@@ -1082,24 +1091,32 @@
                     论文笔记强调，从统计物理的角度看，深度学习的核心可以理解为在高维概率空间中的分布匹配问题。设真实世界的数据分布为 \( p_{\text{data}}(x) \)，深度学习的目标是训练一个参数化模型 \( p_{\theta}(x) \) 来逼近这个分布。这种观点统一了分类、回归和生成等各种任务，将它们都视为某种形式的分布匹配问题。
                 </p>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    最基本的训练目标是极大似然估计（MLE）：
+                    最基本的训练目标是极大似然估计（MLE），利用信息论中的交叉熵分解，这等价于最小化KL散度。论文笔记将这称为"深度学习的第一性原理"：训练就是在KL散度意义下逼近真实分布。
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \max_{\theta} \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('mleMath')">
+                    <span class="text-sm">点击展开 MLE 与 KL 散度数学公式</span>
+                </button>
+                <div id="mleMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <p class="text-gray-700 leading-relaxed mb-4 mt-2">
+                        极大似然估计（MLE）公式：
+                    </p>
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ \max_{\theta} \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        这等价于最小化KL散度 \( D_{KL}(p_{\text{data}} \| p_{\theta}) \)：
+                    </p>
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ D_{KL}(p_{\text{data}} \| p_{\theta}) = \mathbb{E}_{x \sim p_{\text{data}}} \log \frac{p_{\text{data}}(x)}{p_{\theta}(x)} = H(p_{\text{data}}) - \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        其中 \( H(p_{\text{data}}) \) 是数据分布的熵，与模型参数 \( \theta \) 无关。
                     </p>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    利用信息论中的交叉熵分解，这等价于最小化KL散度 \( D_{KL}(p_{\text{data}} \| p_{\theta}) \)：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ D_{KL}(p_{\text{data}} \| p_{\theta}) = \mathbb{E}_{x \sim p_{\text{data}}} \log \frac{p_{\text{data}}(x)}{p_{\theta}(x)} = H(p_{\text{data}}) - \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
-                    </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( H(p_{\text{data}}) \) 是数据分布的熵，与模型参数 \( \theta \) 无关。因此，最小化KL散度等价于最大化对数似然。论文笔记将这称为"深度学习的第一性原理"：训练就是在KL散度意义下逼近真实分布。
-                </p>
                 
                 <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 能量景观理论</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
@@ -1114,32 +1131,45 @@
                 
                 <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 随机梯度下降的统计物理解释</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    随机梯度下降（SGD）算法是训练神经网络的主要方法，从统计物理的角度看，它可以理解为一种Langevin动力学过程：
+                    随机梯度下降（SGD）算法是训练神经网络的主要方法，从统计物理的角度看，它可以理解为一种Langevin动力学过程，描述了一个在能量景观上受噪声驱动的粒子的运动。学习率控制步长，而噪声项则帮助系统逃离局部最小值。
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \theta_{t+1} = \theta_t - \eta \nabla E(\theta_t) + \sqrt{2\eta T} \cdot \xi_t \]
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('sgdMath')">
+                    <span class="text-sm">点击展开 Langevin 动力学数学公式</span>
+                </button>
+                <div id="sgdMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <div class="math-block mt-2">
+                        <p class="text-center">
+                            \[ \theta_{t+1} = \theta_t - \eta \nabla E(\theta_t) + \sqrt{2\eta T} \cdot \xi_t \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        其中 \( \eta \) 是学习率，\( T \) 是"温度"参数，\( \xi_t \) 是高斯白噪声。
                     </p>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( \eta \) 是学习率，\( T \) 是"温度"参数，\( \xi_t \) 是高斯白噪声。这个方程描述了一个在能量景观上受噪声驱动的粒子的运动。学习率 \( \eta \) 控制步长，而噪声项则帮助系统逃离局部最小值。
-                </p>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     论文笔记特别强调了学习率调度的重要性，将其比作退火过程：在训练初期使用较大的学习率（高温）允许系统在能量景观中广泛探索，然后逐渐减小学习率（降温）使系统收敛到某个局部最小值。
                 </p>
                 
                 <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 反向传播的物理意义</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    反向传播算法是计算梯度的高效方法，从统计物理的角度看，它可以理解为在高维参数空间中计算能量梯度的链式法则应用。对于一个具有 \( L \) 层的神经网络，第 \( \ell \) 层的误差项 \( \delta^{(\ell)} \) 可以通过反向传播从第 \( \ell+1 \) 层的误差项计算得到：
+                    反向传播算法是计算梯度的高效方法，从统计物理的角度看，它可以理解为在高维参数空间中计算能量梯度的链式法则应用。这相当于在参数空间中沿着梯度的负方向传播"误差信号"，类似于物理系统中的能量传递过程。
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \delta^{(\ell)} = ((W^{(\ell+1)})^T \delta^{(\ell+1)}) \odot \sigma'(z^{(\ell)}) \]
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('backpropMath')">
+                    <span class="text-sm">点击展开反向传播数学公式</span>
+                </button>
+                <div id="backpropMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <p class="text-gray-700 leading-relaxed mb-4 mt-2">
+                        对于一个具有 \( L \) 层的神经网络，第 \( \ell \) 层的误差项 \( \delta^{(\ell)} \) 可以通过反向传播从第 \( \ell+1 \) 层的误差项计算得到：
+                    </p>
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ \delta^{(\ell)} = ((W^{(\ell+1)})^T \delta^{(\ell+1)}) \odot \sigma'(z^{(\ell)}) \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        其中 \( \odot \) 表示元素级乘法，\( \sigma' \) 是激活函数的导数，\( z^{(\ell)} \) 是第 \( \ell \) 层的加权输入。
                     </p>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( \odot \) 表示元素级乘法，\( \sigma' \) 是激活函数的导数，\( z^{(\ell)} \) 是第 \( \ell \) 层的加权输入。从物理角度看，这相当于在参数空间中沿着梯度的负方向传播"误差信号"，类似于物理系统中的能量传递过程。
-                </p>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     论文笔记还提到了梯度消失和梯度爆炸问题，这些问题可以理解为在深层网络中能量信号的衰减或放大现象，类似于物理中的信号传播问题。现代的激活函数（如ReLU）和归一化技术（如Batch Normalization）在一定程度上解决了这些问题，使更深的网络得以训练。
 
@@ -1182,19 +1212,21 @@
                 
                 <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. LLM推理的随机动力学模型</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    论文笔记还介绍了将LLM的推理过程建模为连续时间随机动力系统的研究方向。研究人员使用随机微分方程（SDE）来描述模型内部状态的演化：
+                    论文笔记还介绍了将LLM的推理过程建模为连续时间随机动力系统的研究方向。研究人员使用随机微分方程（SDE）来描述模型内部状态的演化，这种建模方法能够捕捉LLM推理过程中的不同阶段和状态：
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ dX_t = \mu(X_t, t) dt + \sigma(X_t, t) dW_t \]
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('sdeMath')">
+                    <span class="text-sm">点击展开随机微分方程 (SDE) 数学公式</span>
+                </button>
+                <div id="sdeMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <div class="math-block mt-2">
+                        <p class="text-center">
+                            \[ dX_t = \mu(X_t, t) dt + \sigma(X_t, t) dW_t \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        其中 \( X_t \) 表示模型在时间 \( t \) 的隐藏状态，\( \mu \) 是漂移项（反映确定性演化），\( \sigma \) 是扩散项（反映随机性），\( W_t \) 是维纳过程（布朗运动）。
                     </p>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( X_t \) 表示模型在时间 \( t \) 的隐藏状态，\( \mu \) 是漂移项（反映确定性演化），\( \sigma \) 是扩散项（反映随机性），\( W_t \) 是维纳过程（布朗运动）。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    这种建模方法能够捕捉LLM推理过程中的不同阶段和状态：
-                </p>
                 <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
                     <li><strong>对齐状态</strong>：模型输出与人类期望一致的状态</li>
                     <li><strong>困惑状态</strong>：模型面临不确定性或矛盾信息时的状态</li>
@@ -1251,16 +1283,18 @@
                     LLM的核心是基于自注意力机制的Transformer架构。从统计物理的角度看，自注意力机制可以理解为一种计算序列中不同位置之间相关性的机制，类似于物理系统中粒子之间的相互作用。
                 </p>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    具体来说，自注意力机制计算查询（Query）、键（Key）和值（Value）之间的关系：
+                    具体来说，自注意力机制计算查询（Query）、键（Key）和值（Value）之间的关系。从物理角度看，这一过程可以理解为：
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \]
-                    </p>
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('attentionMath')">
+                    <span class="text-sm">点击展开自注意力机制数学公式</span>
+                </button>
+                <div id="attentionMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <div class="math-block mt-2">
+                        <p class="text-center">
+                            \[ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \]
+                        </p>
+                    </div>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    从物理角度看，这一过程可以理解为：
-                </p>
                 <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
                     <li><strong>能量计算</strong>：查询和键的点积可以看作是计算"能量"或"兼容性"的过程</li>
                     <li><strong>归一化</strong>：softmax操作类似于统计物理中的玻尔兹曼分布，将能量转换为概率</li>
@@ -1275,51 +1309,61 @@
                     LLM的训练通常分为两个阶段：预训练和微调。论文笔记从统计物理的角度对这两个阶段进行了解释：
                 </p>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    <strong>预训练阶段</strong>：模型在海量文本数据上学习语言的统计规律，目标是最小化下一个词预测的交叉熵损失：
+                    <strong>预训练阶段</strong>：模型在海量文本数据上学习语言的统计规律。从物理角度看，这一过程相当于让模型在语言的"能量景观"中寻找最低点，学习语言的统计结构。
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \mathcal{L}_{\text{pretrain}} = -\mathbb{E}_{(w_1, w_2, ..., w_T)} \sum_{t=1}^{T} \log P(w_t | w_1, ..., w_{t-1}; \theta) \]
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>微调阶段</strong>：预训练后的模型在特定任务或数据集上进行微调，以适应特定的应用场景。从物理角度看，这相当于在原始能量景观上添加一个额外的"势能项"，引导模型向特定的行为模式演化。
+                </p>
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('trainingMath')">
+                    <span class="text-sm">点击展开预训练与微调损失函数公式</span>
+                </button>
+                <div id="trainingMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <p class="text-gray-700 leading-relaxed mb-4 mt-2">
+                        预训练阶段目标是最小化下一个词预测的交叉熵损失：
                     </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    从物理角度看，这一过程相当于让模型在语言的"能量景观"中寻找最低点，学习语言的统计结构。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    <strong>微调阶段</strong>：预训练后的模型在特定任务或数据集上进行微调，以适应特定的应用场景：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ \mathcal{L}_{\text{finetune}} = \mathcal{L}_{\text{pretrain}} + \lambda \mathcal{L}_{\text{task}} \]
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ \mathcal{L}_{\text{pretrain}} = -\mathbb{E}_{(w_1, w_2, ..., w_T)} \sum_{t=1}^{T} \log P(w_t | w_1, ..., w_{t-1}; \theta) \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        微调阶段目标函数：
                     </p>
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ \mathcal{L}_{\text{finetune}} = \mathcal{L}_{\text{pretrain}} + \lambda \mathcal{L}_{\text{task}} \]
+                        </p>
+                    </div>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    从物理角度看，这相当于在原始能量景观上添加一个额外的"势能项"，引导模型向特定的行为模式演化。
-                </p>
                 
                 <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 自回归生成的随机过程视角</h4>
                 <p class="text-gray-700 leading-relaxed mb-4">
-                    LLM的生成过程是自回归的，即逐个生成文本标记。从统计物理的角度看，这一过程可以理解为在条件概率分布上的随机游走：
+                    LLM的生成过程是自回归的，即逐个生成文本标记。从统计物理的角度看，这一过程可以理解为在条件概率分布上的随机游走。论文笔记指出，生成过程中的温度参数控制着输出的随机性，从物理角度看，这相当于调整系统的温度，控制系统的无序程度：
                 </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ P(w_t | w_1, w_2, ..., w_{t-1}) = \text{softmax}(z_t) \]
+                <button class="collapsible-header w-full text-left bg-gray-50 hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors flex justify-between items-center mb-4" onclick="toggleCollapsible('autoregressiveMath')">
+                    <span class="text-sm">点击展开自回归生成与温度控制数学公式</span>
+                </button>
+                <div id="autoregressiveMath" class="collapsible-content bg-white border border-gray-100 rounded-b-lg px-4 py-2 mb-4">
+                    <p class="text-gray-700 leading-relaxed mb-4 mt-2">
+                        条件概率分布上的随机游走：
                     </p>
-                </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    其中 \( z_t \) 是模型的输出分数，softmax函数将这些分数转换为概率分布。
-                </p>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    论文笔记指出，生成过程中的温度参数 \( T \) 控制着输出的随机性：
-                </p>
-                <div class="math-block">
-                    <p class="text-center">
-                        \[ P(w_t | w_1, ..., w_{t-1}) = \frac{\exp(z_t / T)}{\sum_{w'} \exp(z_{w'} / T)} \]
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ P(w_t | w_1, w_2, ..., w_{t-1}) = \text{softmax}(z_t) \]
+                        </p>
+                    </div>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        其中 \( z_t \) 是模型的输出分数，softmax函数将这些分数转换为概率分布。
                     </p>
+                    <p class="text-gray-700 leading-relaxed mb-4">
+                        引入温度参数 \( T \) 后的概率分布：
+                    </p>
+                    <div class="math-block">
+                        <p class="text-center">
+                            \[ P(w_t | w_1, ..., w_{t-1}) = \frac{\exp(z_t / T)}{\sum_{w'} \exp(z_{w'} / T)} \]
+                        </p>
+                    </div>
                 </div>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    从物理角度看，这相当于调整系统的温度，控制系统的无序程度：
-                </p>
                 <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
                     <li><strong>高温度（\( T \gg 1 \)）</strong>：输出更加随机和多样化，但可能缺乏连贯性</li>
                     <li><strong>低温度（\( T \ll 1 \)）</strong>：输出更加确定和保守，倾向于选择最可能的标记</li>
