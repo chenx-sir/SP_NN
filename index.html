@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计物理与神经网络：讲座笔记分析</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        accent: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Georgia', 'serif'],
+                        mono: ['Consolas', 'Monaco', 'monospace']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-in': 'slideIn 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            .bg-gradient {
+                background: linear-gradient(135deg, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%);
+            }
+            .math-block {
+                overflow-x: auto;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                background-color: #f8fafc;
+                margin: 1rem 0;
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            .collapsible-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+            }
+            .collapsible-active {
+                max-height: 2000px;
+                transition: max-height 1s ease-in;
+            }
+            .collapsible-header::after {
+                content: '\002B';
+                color: #3b82f6;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+                transition: transform 0.3s ease;
+            }
+            .collapsible-header-active::after {
+                content: "\2212";
+                transform: rotate(180deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-book text-primary text-2xl"></i>
+                <span class="font-bold text-xl">统计物理与神经网络</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#introduction" class="text-gray-600 hover:text-primary transition-colors">引言</a>
+                <a href="#statistical-physics" class="text-gray-600 hover:text-primary transition-colors">统计物理基础</a>
+                <a href="#renormalization" class="text-gray-600 hover:text-primary transition-colors">重整化群</a>
+                <a href="#boltzmann-machines" class="text-gray-600 hover:text-primary transition-colors">玻尔兹曼机</a>
+                <a href="#deep-learning" class="text-gray-600 hover:text-primary transition-colors">深度学习</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-primary">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg absolute w-full">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#introduction" class="text-gray-600 hover:text-primary transition-colors py-2">引言</a>
+                <a href="#statistical-physics" class="text-gray-600 hover:text-primary transition-colors py-2">统计物理基础</a>
+                <a href="#renormalization" class="text-gray-600 hover:text-primary transition-colors py-2">重整化群</a>
+                <a href="#boltzmann-machines" class="text-gray-600 hover:text-primary transition-colors py-2">玻尔兹曼机</a>
+                <a href="#deep-learning" class="text-gray-600 hover:text-primary transition-colors py-2">深度学习</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 头部横幅 -->
+    <header class="pt-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="container mx-auto px-4 py-16 md:py-24">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-shadow animate-fade-in">统计物理与神经网络</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90 animate-slide-in">讲座笔记分析与可视化</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#introduction" class="bg-white text-primary font-medium px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                        开始阅读
+                    </a>
+                    <a href="#key-concepts" class="bg-transparent border-2 border-white text-white font-medium px-6 py-3 rounded-lg hover:bg-white/10 transition-colors">
+                        关键概念
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 论文信息卡片 -->
+        <section class="bg-white rounded-xl shadow-md p-6 mb-12 max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Lecture Notes on Statistical Physics and Neural Networks</h2>
+                    <p class="text-gray-600 mb-4">Olaf Hohm - Institute for Physics, Humboldt University Berlin</p>
+                    <p class="text-sm text-gray-500">发布日期: 2026年5月</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="https://arxiv.org/pdf/2605.06394" target="_blank" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fa fa-file-pdf-o mr-2"></i>
+                        查看原论文
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 摘要部分 -->
+        <section id="introduction" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">摘要</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这些讲座笔记介绍了经典统计物理的一些主题，特别是与神经网络和深度学习相关的内容。统计物理被视为概率论或统计学的一个分支，旨在使相变和重整化群等概念对没有物理学先验知识的读者易于理解。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    笔记介绍了有限配置空间上的玻尔兹曼-吉布斯分布和热力学势，特别是格点上的伊辛自旋和自旋玻璃模型，然后将相变定义为在格点数趋于无穷大的极限中出现的不连续性。
+                </p>
+                <p class="text-gray-700 leading-relaxed">
+                    进一步介绍了霍普菲尔德网络和玻尔兹曼机，它们由与自旋玻璃模型相同的能量函数控制，并讨论了受限玻尔兹曼机的学习算法。在现代深度学习中，早期发展部分受到受限玻尔兹曼机的启发，因为它们携带多层隐藏神经元。笔记还描述了大型语言模型。
+                </p>
+            </div>
+        </section>
+
+        <!-- 关键概念概览 -->
+        <section id="key-concepts" class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">关键概念概览</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 概念卡片 1 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-thermometer-half text-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">玻尔兹曼分布</h3>
+                    <p class="text-gray-600">
+                        基于能量函数定义的概率分布，依赖于温度参数，是统计物理和神经网络的基础概念。
+                    </p>
+                </div>
+                
+                <!-- 概念卡片 2 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-exchange text-secondary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">相变</h3>
+                    <p class="text-gray-600">
+                        在格点数趋于无穷大的热力学极限中出现的不连续性，标志着系统行为的质变。
+                    </p>
+                </div>
+                
+                <!-- 概念卡片 3 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-refresh text-accent text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">重整化群</h3>
+                    <p class="text-gray-600">
+                        一种通过积分掉自由度来研究系统在不同尺度下行为的方法，关键用于分析相变。
+                    </p>
+                </div>
+                
+                <!-- 概念卡片 4 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-braille text-red-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">伊辛模型</h3>
+                    <p class="text-gray-600">
+                        描述格点上自旋系统的模型，用于研究铁磁性和相变，是统计物理的基础模型之一。
+                    </p>
+                </div>
+                
+                <!-- 概念卡片 5 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-sitemap text-yellow-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">霍普菲尔德网络</h3>
+                    <p class="text-gray-600">
+                        一种递归神经网络模型，其能量函数与自旋玻璃模型相同，可用于联想记忆。
+                    </p>
+                </div>
+                
+                <!-- 概念卡片 6 -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-code-fork text-indigo-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">深度学习</h3>
+                    <p class="text-gray-600">
+                        使用多层神经网络的机器学习方法，其早期发展部分受到受限玻尔兹曼机的启发。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计物理基础 -->
+        <section id="statistical-physics" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">统计物理基础</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">玻尔兹曼分布</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    玻尔兹曼-吉布斯分布是统计物理的基础，它定义了在给定温度下系统处于特定状态的概率。对于具有能量函数 \( E(\sigma) \) 的系统，状态 \( \sigma \) 的概率为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ p(\sigma) = \frac{1}{Z} e^{-\beta E(\sigma)} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \beta = 1/(k_B T) \) 是温度的倒数（\( k_B \) 是玻尔兹曼常数），\( Z \) 是配分函数，确保概率归一化：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ Z = \sum_{\sigma} e^{-\beta E(\sigma)} \]
+                    </p>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">伊辛模型</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    伊辛模型是统计物理中研究相变的经典模型。在格点上的伊辛模型中，每个格点 \( i \) 有一个自旋变量 \( \sigma_i \in \{+1, -1\} \)，系统的能量函数为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ E(\sigma) = -J \sum_{\langle i,j \rangle} \sigma_i \sigma_j - h \sum_i \sigma_i \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( J \) 是相邻自旋之间的耦合强度，\( h \) 是外磁场，\( \langle i,j \rangle \) 表示只对相邻格点求和。
+                </p>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">一维伊辛模型的精确解</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    一维伊辛模型是少数可以被精确求解的统计物理模型之一。根据论文中的推导，我们可以通过传递矩阵方法得到其精确解，并证明一维伊辛模型在零外磁场下不会发生相变。
+                </p>
+                
+                <!-- 可折叠的详细推导部分 -->
+                <button class="collapsible-header w-full text-left bg-blue-50 hover:bg-blue-100 text-blue-800 font-medium py-3 px-4 rounded-lg transition-colors flex justify-between items-center" onclick="toggleCollapsible('ising1D')">
+                    <span>点击展开一维伊辛模型的详细推导（按论文原文）</span>
+                </button>
+                <div id="ising1D" class="collapsible-content bg-white border border-blue-100 rounded-b-lg px-4 py-2">
+                    <div class="py-4">
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            考虑一个由 \( N \) 个自旋组成的一维链，采用周期性边界条件（\( \sigma_{N+1} = \sigma_1 \)），其能量函数为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ E(\sigma) = -J \sum_{i=1}^{N} \sigma_i \sigma_{i+1} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( J \) 是耦合常数，我们设外磁场 \( B = 0 \)。配分函数为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z_N(\beta) = \sum_{\{\sigma_i = \pm 1\}} e^{-\beta E(\sigma)} = \sum_{\{\sigma_i = \pm 1\}} e^{K \sum_i \sigma_i \sigma_{i+1}} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( K = \beta J \)。我们可以将其展开为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z_N(\beta) = \sum_{\sigma_1 = \pm 1} \cdots \sum_{\sigma_N = \pm 1} e^{K \sigma_1 \sigma_2} e^{K \sigma_2 \sigma_3} \cdots e^{K \sigma_{N-1} \sigma_N} e^{K \sigma_N \sigma_1} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            关键技巧是定义传递矩阵 \( T \)，它是一个 2×2 矩阵，其矩阵元为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ T_{\sigma, \sigma'} = e^{K \sigma \sigma'} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( \sigma, \sigma' \in \{-1, +1\} \)。这样，配分函数中的求和可以表示为矩阵乘积：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma_2 = \pm 1} e^{K \sigma_1 \sigma_2} e^{K \sigma_2 \sigma_3} = (T^2)_{\sigma_1 \sigma_3} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对所有中间变量 \( \sigma_2, \ldots, \sigma_N \) 求和后，配分函数变为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z_N(\beta) = \sum_{\sigma_1 = \pm 1} (T^N)_{\sigma_1 \sigma_1} = \text{Tr}(T^N) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            为了计算传递矩阵的迹，我们可以将其对角化。传递矩阵 \( T \) 的两个本征值为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \lambda_{\pm} = e^K \pm e^{-K} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            因此，配分函数为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z_N(\beta) = \lambda_+^N + \lambda_-^N \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            在热力学极限下（\( N \to \infty \)），由于 \( \lambda_+ > \lambda_- \)，只有最大的本征值 \( \lambda_+ \) 起主导作用：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \frac{1}{N} \ln Z_N = \ln \lambda_+ + \frac{1}{N} \ln \left(1 + \left(\frac{\lambda_-}{\lambda_+}\right)^N\right) \approx \ln \lambda_+ \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            因此，自由能密度为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ f(\beta) = \lim_{N \to \infty} \frac{1}{N} F_N(\beta) = -\lim_{N \to \infty} \frac{1}{N \beta} \ln Z_N = -\frac{1}{\beta} \ln \lambda_+ \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            代入 \( \lambda_+ = e^K + e^{-K} = 2 \cosh(K) \)，我们得到：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ f(\beta) = -\frac{1}{\beta} \ln(2 \cosh(K)) = -\frac{1}{\beta} \ln(2 \cosh(\beta J)) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            由于 \( \cosh(K) \) 是解析函数且始终大于等于 1，自由能密度也是解析的。因此，一维伊辛模型在零外磁场下不会发生相变。这与二维和更高维伊辛模型的行为不同，后者在临界温度下会发生相变。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 一维伊辛模型磁化强度图表 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">一维伊辛模型的磁化强度随外磁场变化</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="ising1DMagnetizationChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- 伊辛模型相变图表 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">伊辛模型相变示意图</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="isingPhaseChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">自旋玻璃模型</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    自旋玻璃模型是伊辛模型的推广，其中相邻自旋之间的耦合强度 \( J_{ij} \) 是随机的。其能量函数为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ E(\sigma) = -\sum_{i < j} J_{ij} \sigma_i \sigma_j - \sum_i b_i \sigma_i \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    自旋玻璃模型具有非常丰富的基态空间，这一特性被霍普菲尔德用来模拟大脑的记忆功能。
+                </p>
+                
+                <!-- 自旋玻璃模型受挫示意图 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">自旋玻璃模型中的受挫现象</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="spinGlassFrustrationChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 可折叠的自旋玻璃模型详细推导部分 -->
+                <button class="collapsible-header w-full text-left bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-3 px-4 rounded-lg transition-colors flex justify-between items-center" onclick="toggleCollapsible('spinGlass')">
+                    <span>点击展开自旋玻璃模型的详细推导（按论文原文）</span>
+                </button>
+                <div id="spinGlass" class="collapsible-content bg-white border border-yellow-100 rounded-b-lg px-4 py-2">
+                    <div class="py-4">
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            自旋玻璃模型是伊辛模型的推广，其中相邻自旋之间的耦合强度 \( J_{ij} \) 是随机的。根据论文中的描述，爱德华兹-安德森模型旨在描述这样的系统，其配置空间与伊辛模型相同，但能量函数为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ E(\sigma) = -\sum_{(i j)} J_{i j} \sigma_{i} \sigma_{j} - B \sum_{i} \sigma_{i} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中第一项通常仍然假设只包含最近邻相互作用，即耦合常数 \( J_{i j} \) 仅在由i和j标记的格点通过边连接时才非零。该模型的主要创新在于耦合常数 \( J_{i j} \) 的随机性，因此配分函数也将依赖于这些常数：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z_{N}(\beta, B, J_{ij}) = \sum_{\sigma} \exp\left( \beta \sum_{(ij)} J_{ij} \sigma_{i} \sigma_{j} + \beta B \sum_{i} \sigma_{i} \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            通常假设 \( J_{i j} \) 来自随机分布。使自旋玻璃模型更加微妙的是，这些常数可能有两种符号，我们表示为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ J_{ij} > 0: \text{铁磁性}, \quad J_{ij} < 0: \text{反铁磁性} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这意味着基态空间（最小化能量的配置）可能非常丰富，这是由于"受挫"的概念。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            为了解释受挫，考虑 \( J_{i j} = \pm 1 \) 和 \( B = 0 \)。连接i和j的边相关的能量为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ J_{ij} = 1: E = -\sigma_{i} \sigma_{j} \Rightarrow \text{当} \sigma_{i} = \sigma_{j} \text{时最小} \]
+                                \[ J_{ij} = -1: E = \sigma_{i} \sigma_{j} \Rightarrow \text{当} \sigma_{i} = -\sigma_{j} \text{时最小} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            换句话说，为了最小化能量，对于 \( J = +1 \)，自旋希望平行，而对于 \( J = -1 \)，它们希望反平行。如果考虑由四个格点组成的方形，如果所有 \( J = \pm 1 \) 具有相同的符号，则最小能量为 \( E = -4 \)，自旋全部平行（对于 \( J = 1 \)）或交替（对于 \( J = -1 \)）。然而，如果一些J是+1而一些是-1，则最小能量更大，配置具有简并性，这是因为无法同时满足所有边的最小能量条件。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这种无法通过分配自旋将能量降低到（例如）伊辛模型最小值的情况，被恰当地称为阻挫。
+                        </p>
+                            我们通过将其泰勒展开到 \( \beta \) 的二阶来举例说明微扰理论方法：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z = \sum_{\sigma} \left( 1 + \frac{\beta}{2} \sum_{i,j} J_{ij} \sigma_{i} \sigma_{j} + \frac{\beta^2}{8} \sum_{i,j,k,l} J_{ij} J_{kl} \sigma_{i} \sigma_{j} \sigma_{k} \sigma_{l} + \cdots \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            为了计算这个，我们需要对各种 \( \sigma \) 幂次的所有 \( \sigma \) 配置进行求和，例如：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma} 1 = 2^N, \quad \sum_{\sigma} \sigma_{i} = 0, \quad \sum_{\sigma} \sigma_{i} \sigma_{j} = 2^N \delta_{ij} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中在最后一个方程中，我们使用了克罗内克符号 \( \delta_{ij} \)，当 \( i = j \) 时等于1，否则等于0。第二个关系成立是因为我们可以执行求和变量的移位 \( \sigma_{i} \to -\sigma_{i} \)，以显示求和变为其自身的负数，因此为零。第三个关系类似地成立，因为对于 \( i = j \)，由于 \( \sigma_{i}^2 = 1 \)，它简化为第一个关系，而对于 \( i \neq j \)，我们可以再次执行索引移位 \( \sigma_{i} \to -\sigma_{i} \)。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            我们可以通过注意到通过相同的论证，所有奇数幂次的 \( \sigma \) 的求和都为零，而对于所有偶数幂次，结果非零（然后等于 \( 2^N \)），如果 \( \sigma \) 的索引成对具有相同的索引。更一般地，我们有：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma} \sigma_{i_1} \sigma_{i_2} \cdots \sigma_{i_m} = \begin{cases} 
+                                2^N, & \text{如果每个索引出现偶数次}, \\
+                                0, & \text{否则}.
+                                \end{cases} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            使用这些关系，我们可以计算配分函数到二阶：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ Z(\beta, J) = 2^N \left( 1 + \frac{\beta^2}{4} \sum_{k,l} J_{kl} J_{kl} + \cdots \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            因此，
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \frac{1}{Z} = \frac{1}{2^N} \left( 1 - \frac{\beta^2}{4} \sum_{k,l} J_{kl} J_{kl} + \cdots \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这种高温展开方法允许我们在高温区域计算自旋玻璃模型的各种热力学量。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 重整化群 -->
+        <section id="renormalization" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">重整化群</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    重整化群（RG）是研究相变的强大工具。其基本思想是通过积分掉部分自由度，研究系统在不同尺度下的行为。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    对于格点系统，一个典型的RG步骤包括：
+                </p>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700 mb-6">
+                    <li>选择要积分掉的自由度（例如，每隔一个格点的自旋）</li>
+                    <li>对这些自由度求和，得到剩余自由度的有效哈密顿量</li>
+                    <li>重新标度系统参数（如耦合常数、温度）</li>
+                </ol>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">一维伊辛模型的重整化群分析</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    一维伊辛模型是理解重整化群方法的基础，也是展示维度对相变影响的典型例子。考虑一维伊辛模型的哈密顿量：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ H = -J \sum_{i=1}^{N} \sigma_i \sigma_{i+1} - B \sum_{i=1}^{N} \sigma_i \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( J \) 是相邻自旋之间的耦合强度，\( B \) 是外磁场，\( \sigma_i = \pm 1 \) 是第 \( i \) 个格点的自旋，边界条件为周期性边界条件 \( \sigma_{N+1} = \sigma_1 \)。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 重整化群变换的具体步骤</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    对于一维伊辛模型，我们采用实空间重整化群方法，具体步骤如下：
+                </p>
+                <ol class="list-decimal list-inside space-y-3 text-gray-700 mb-6">
+                    <li><strong>粗粒化</strong>：将一维链划分为块，每个块包含两个相邻的自旋 \( (\sigma_{2i-1}, \sigma_{2i}) \)。</li>
+                    <li><strong>块自旋定义</strong>：定义新的块自旋变量 \( \tau_i = \sigma_{2i-1} \cdot \sigma_{2i} \)，表示块内自旋的相对取向。</li>
+                    <li><strong>积分掉快变量</strong>：对原始自旋变量求和，只保留块自旋变量。</li>
+                    <li><strong>重新标度</strong>：将系统长度重新标度为原来的一半，同时调整耦合常数。</li>
+                </ol>
+
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    对于零外磁场（\( B = 0 \)）的情况，配分函数为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ Z = \sum_{\{\sigma_i\}} \exp\left( K \sum_{i=1}^{N} \sigma_i \sigma_{i+1} \right) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( K = \beta J = J/(k_B T) \) 是无量纲的耦合常数。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    现在，我们将自旋分为偶数位置和奇数位置，然后积分掉奇数位置的自旋。对于每个奇数位置的自旋 \( \sigma_{2i-1} \)，它与相邻的偶数位置自旋 \( \sigma_{2i-2} \) 和 \( \sigma_{2i} \) 相互作用。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    对奇数位置自旋的求和可以表示为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \sum_{\sigma_{2i-1}=\pm 1} \exp\left[ K \sigma_{2i-1}(\sigma_{2i-2} + \sigma_{2i}) \right] \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    完成这个求和后，我们得到：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \exp\left[ K' \sigma_{2i-2} \sigma_{2i} \right] \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    通过比较两边的系数，我们可以得到重整化群变换的表达式：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ K' = \ln \cosh(2K) \]
+                    </p>
+                </div>
+
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 重整化群不动点分析</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    重整化群不动点是指在RG变换下保持不变的参数值，即满足 \( K^* = R(K^*) \)，其中 \( R \) 表示RG变换。对于一维伊辛模型，不动点满足：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ K^* = \ln \cosh(2K^*) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    我们可以通过分析函数 \( f(K) = \ln \cosh(2K) \) 和直线 \( y = K \) 的交点来确定不动点。
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ f(0) = \ln \cosh(0) = \ln(1) = 0 \]
+                        \[ f'(K) = \frac{2 \sinh(2K)}{\cosh(2K)} = 2 \tanh(2K) \]
+                        \[ f'(0) = 0 \]
+                        \[ \lim_{K \to \infty} f(K) = \lim_{K \to \infty} \ln \left( \frac{e^{2K} + e^{-2K}}{2} \right) \approx \lim_{K \to \infty} (2K - \ln 2) = \infty \]
+                        \[ \lim_{K \to \infty} f'(K) = 2 \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    由于 \( f'(0) = 0 < 1 \) 且 \( \lim_{K \to \infty} f'(K) = 2 > 1 \)，根据中间值定理，存在一个临界值 \( K_c \) 使得 \( f'(K_c) = 1 \)。然而，由于函数 \( f(K) \) 在 \( K > 0 \) 时始终位于直线 \( y = K \) 下方（可以通过泰勒展开验证），因此除了 \( K^* = 0 \) 之外，没有其他不动点。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    因此，一维伊辛模型的重整化群只有一个不动点 \( K^* = 0 \)，对应于无穷高温度的极限情况。
+
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 一维伊辛模型为何没有相变</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    一维伊辛模型在零外磁场下没有相变，这一结论可以通过重整化群分析得到解释：
+                </p>
+                <ol class="list-decimal list-inside space-y-3 text-gray-700 mb-6">
+                    <li><strong>单一不动点</strong>：一维伊辛模型只有一个重整化群不动点 \( K^* = 0 \)，对应于无序相。没有对应于有序相的非平凡不动点。</li>
+                    <li><strong>RG流的行为</strong>：对于任意有限的初始耦合常数 \( K > 0 \)，应用RG变换后，耦合常数 \( K' \) 总是小于 \( K \)（因为 \( \ln \cosh(2K) < K \) 对于 \( K > 0 \)）。这意味着RG流总是趋向于不动点 \( K^* = 0 \)，无论初始温度多低。</li>
+                    <li><strong>关联长度的行为</strong>：关联长度 \( \xi \) 表示自旋之间相关性的特征长度。在重整化群变换下，关联长度按比例缩放：\( \xi' = \xi/b \)，其中 \( b \) 是块大小（这里 \( b = 2 \)）。对于一维伊辛模型，关联长度始终是有限的，不会出现临界发散。</li>
+                </ol>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从数学上可以证明，对于一维伊辛模型，自由能密度是温度的解析函数，没有奇异性，这意味着没有相变发生。这与二维和更高维伊辛模型形成鲜明对比，后者在临界温度下会发生相变。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这一结果也符合Mermin-Wagner定理，该定理指出，在一维和二维系统中，对于具有连续对称性的系统，在有限温度下不存在长程有序。虽然伊辛模型具有离散对称性（Z₂对称性），但在一维情况下，热涨落仍然足够强，足以破坏任何长程有序。
+                </p>
+
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">4. 外磁场对一维伊辛模型的影响</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    当存在外磁场 \( B \neq 0 \) 时，一维伊辛模型的重整化群变换变得更加复杂，需要考虑磁场的影响：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ K' = \ln \cosh(2K) \]
+                        \[ h' = \ln \left( \frac{\cosh(2K + h)}{\cosh(2K - h)} \right)^{1/2} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( h = \beta B = B/(k_B T) \) 是无量纲的磁场强度。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    在外磁场存在的情况下，系统的对称性被打破，即使在一维情况下，也会出现磁化现象。然而，这仍然不是相变，因为相变需要自由能或其导数的非解析行为，而一维伊辛模型在有限温度下的自由能始终是解析的。
+                </p>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">二维伊辛模型的RG</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    二维伊辛模型的RG更为复杂，通常需要考虑更多的相互作用项。在简单的截断近似下，耦合常数 \( K \) 和次近邻耦合 \( L \) 的RG变换为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ K' = 2K^2 + L \]
+                        \[ L' = K^2 \]
+                    </p>
+                </div>
+
+                <!-- RG流图表 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">二维伊辛模型的RG流示意图</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="rgFlowChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    RG固定点 \( (K^*, L^*) \) 满足 \( K^* = 2(K^*)^2 + L^* \) 和 \( L^* = (K^*)^2 \)，解得非平凡固定点 \( (K^*, L^*) = (1/3, 1/9) \)，对应于二维伊辛模型的相变点。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    分析RG流的行为，我们可以看到：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li>当系统温度高于临界温度 \( T_c \) 时，RG流趋向于高斯不动点（原点），表示系统处于无序相。</li>
+                    <li>当系统温度低于临界温度 \( T_c \) 时，RG流趋向于强耦合不动点，表示系统处于有序相。</li>
+                    <li>当系统温度等于临界温度 \( T_c \) 时，RG流趋向于Wilson-Fisher不动点，表示系统处于临界态。</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从RG流的分析中，我们可以确定临界指数。例如，关联长度的临界指数 \( \nu \) 与RG变换的特征值相关：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \nu = \frac{1}{\ln \lambda} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \lambda \) 是RG变换在固定点处的最大特征值。对于二维伊辛模型，理论预测的临界指数与实验结果和数值模拟高度一致，展示了重整化群方法的强大威力。
+                </p>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">重整化群与神经网络的联系</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    重整化群的思想不仅在统计物理中有着重要应用，也为理解和设计神经网络提供了新的视角。这种联系主要体现在以下几个方面：
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>1. 深度神经网络中的信息流动</strong>：深度神经网络的每一层都可以看作是对输入数据的一种"粗粒化"操作，类似于重整化群中的尺度变换。通过这种方式，网络能够逐渐提取数据中的高层次特征，忽略无关的细节。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>2. 受限玻尔兹曼机与重整化群</strong>：在受限玻尔兹曼机（RBM）中，隐藏层神经元的积分过程类似于重整化群中的自由度消除。这种相似性使得我们可以利用重整化群的理论来分析RBM的学习行为和表达能力。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>3. 卷积神经网络的尺度不变性</strong>：卷积神经网络（CNN）通过卷积操作和池化层实现了某种形式的尺度不变性，这与重整化群的思想密切相关。池化层可以看作是一种显式的粗粒化操作，而卷积核则可以看作是在不同位置共享的有效相互作用。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>4. 神经网络的相变现象</strong>：研究表明，训练过程中的神经网络可能经历相变，例如从随机初始化的无序状态转变为有序的泛化状态。这些相变可以用重整化群的语言来描述和分析。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>5. 网络架构设计</strong>：重整化群的思想可以指导我们设计更有效的神经网络架构。例如，残差网络（ResNet）中的跳跃连接可以看作是保持信息在不同尺度之间流动的一种方式，这与重整化群中的某些技术有着相似之处。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这种跨学科的联系为理解神经网络的工作原理和设计更高效的学习算法提供了新的思路。正如统计物理帮助我们理解物质的相变和临界现象一样，它也可能帮助我们理解神经网络中的信息处理和学习过程。
+                </p>
+                
+                <!-- 可折叠的二维伊辛模型RG详细推导部分 -->
+                <button class="collapsible-header w-full text-left bg-green-50 hover:bg-green-100 text-green-800 font-medium py-3 px-4 rounded-lg transition-colors flex justify-between items-center" onclick="toggleCollapsible('ising2DRG')">
+                    <span>点击展开二维伊辛模型重整化群的详细推导（按论文原文）</span>
+                </button>
+                <div id="ising2DRG" class="collapsible-content bg-white border border-green-100 rounded-b-lg px-4 py-2">
+                    <div class="py-4">
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对于二维伊辛模型，我们考虑一个RG变换，其中我们积分掉每隔一个自旋（如图4中红色显示的自旋）。对于每个被积分掉的自旋，我们需要计算其对四个最近邻自旋的有效贡献：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma= \pm 1} e^{K \sigma\left(\sigma_{1}+\sigma_{2}+\sigma_{3}+\sigma_{4}\right)} = 2 \cosh \left(K\left(\sigma_{1}+\sigma_{2}+\sigma_{3}+\sigma_{4}\right)\right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            我们可以将其重写为新的能量函数形式：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ e^{A'+\frac{1}{2} K'\left(\sigma_{1} \sigma_{2}+\sigma_{1} \sigma_{4}+\sigma_{2} \sigma_{3}+\sigma_{3} \sigma_{4}\right)+L'\left(\sigma_{1} \sigma_{3}+\sigma_{2} \sigma_{4}\right)+M' \sigma_{1} \sigma_{2} \sigma_{3} \sigma_{4}} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这需要引入次近邻相互作用和四体相互作用。通过考虑所有可能的平行和反平行组合 \( \sigma_{1}, ..., \sigma_{4} \)，我们可以解得新的系数：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ A'(K) = \ln 2+\frac{1}{8} \ln \cosh (4 K)+\frac{1}{2} \ln \cosh (2 K) \]
+                                \[ K'(K) = \frac{1}{4} \ln \cosh (4 K) \]
+                                \[ L'(K) = \frac{1}{8} \ln \cosh (4 K) \]
+                                \[ M'(K) = \frac{1}{8} \ln \cosh (4 K)-\frac{1}{2} \ln \cosh (2 K) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            如果我们执行第二次RG步骤，我们会生成更高阶的相互作用。为了简化计算，我们可以截断到 \( (K, L) \) 子空间，并对 \( \ln \cosh(x) \) 进行泰勒展开到二阶：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \ln \cosh (x) \simeq \frac{1}{2} x^{2} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这给出：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ K'=2 K^{2}, \quad L'=K^{2} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这些方程太简单，无法展示RG固定点。我们需要在起始模型中也包含次近邻相互作用（耦合 \( L \)），然后看看第一次RG步骤后会发生什么：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \sum_{\sigma =\pm 1}e^{K\sigma (\sigma _{1}+\sigma _{2}+\sigma _{3}+\sigma _{4})+L(\sigma _{1}\sigma _{2}+\sigma _{1}\sigma _{4}+\sigma _{3}\sigma _{4}+\sigma _{2}\sigma _{3})} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            次近邻相互作用不涉及求和变量 \( \sigma \)，因此只是简单地因子化并将 \( K' \) 移动 \( L \)，所以(3.21)被替换为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ K'=2 K^{2}+L, \quad L'=K^{2} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这些方程定义了二维伊辛模型的截断RG流。RG固定点 \( (K^{*}, L^{*}) \) 需要满足：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ K^{*}=2(K^{*})^{2}+L^{*}, \quad L^{*}=(K^{*})^{2} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            除了平凡解 \( (K^{*}, L^{*})=(0,0) \) 外，还有非平凡解：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \left(K^{*}, L^{*}\right)=\left(\frac{1}{3}, \frac{1}{9}\right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这个非平凡固定点对应于二维伊辛模型的相变点。通过分析固定点附近的线性化RG流，我们可以确定临界指数，这些指数描述了系统在临界点附近的行为。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 玻尔兹曼机 -->
+        <section id="boltzmann-machines" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">玻尔兹曼机</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">神经元与霍普菲尔德网络</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    神经元是神经网络的基本计算单元，它接收输入信号，进行加权求和，然后通过非线性激活函数产生输出。最简单的神经元模型可以表示为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ y = f_\theta(x) = \Theta\left(\sum_i w_i x_i + b\right) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \Theta \) 是阶跃函数，\( w_i \) 是权重，\( b \) 是偏置。
+                </p>
+
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    霍普菲尔德网络由 \( N \) 个神经元组成，每个神经元的状态为 \( \sigma_i = \pm 1 \)。网络的能量函数为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ E(\sigma) = -\frac{1}{2} \sum_{i,j} w_{ij} \sigma_i \sigma_j - \sum_i b_i \sigma_i \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中权重矩阵是对称的（\( w_{ij} = w_{ji} \)），且没有自连接（\( w_{ii} = 0 \)）。
+                </p>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">自旋玻璃与神经网络的联系</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文中指出，自旋玻璃模型与霍普菲尔德网络有着密切的联系。霍普菲尔德网络由N个神经元组成，每个神经元的状态为 \( \sigma_i = \pm 1 \)，其能量函数与自旋玻璃模型相同：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ E(\sigma) = -\frac{1}{2} \sum_{i,j} w_{ij} \sigma_i \sigma_j - \sum_i b_i \sigma_i \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( w_{ij} = w_{ji} \) 是神经元之间的连接权重，\( w_{ii} = 0 \) 表示神经元不与自身连接，\( b_i \) 是偏置。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    霍普菲尔德网络的动力学规则是确定性的，它会使网络状态演化到能量函数的局部最小值。这一特性被用来实现联想记忆：网络可以被训练成将特定的模式存储为能量函数的局部最小值，然后当输入一个部分或噪声版本的模式时，网络会收敛到完整的存储模式。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文中还介绍了如何通过存储多个模式来训练霍普菲尔德网络。假设我们要存储M个模式 \( \{\xi^1, \xi^2, ..., \xi^M\} \)，其中每个模式是一个N维向量，每个分量为 \( \xi_i^A = \pm 1 \)。权重可以通过以下规则设置：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ w_{ij} = \frac{1}{N} \sum_{A=1}^{M} \xi_i^A \xi_j^A \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这种学习规则被称为赫布学习规则，它基于"一起放电的神经元连接在一起"的原则。
+                </p>
+
+                <!-- 霍普菲尔德网络示意图 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">霍普菲尔德网络结构示意图</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="hopfieldNetworkChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">玻尔兹曼机</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    玻尔兹曼机是一种基于能量的随机神经网络模型，其状态按照玻尔兹曼分布进行采样。与霍普菲尔德网络不同，玻尔兹曼机引入了随机性，使其能够逃离局部最小值，这一特性与统计物理中的热涨落概念密切相关。
+                </p>
+                
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    根据论文中的描述，玻尔兹曼机的名称来源于其使用的概率分布。对于一个具有能量函数 \( E(\sigma) \) 的玻尔兹曼机，其状态 \( \sigma \) 的概率分布为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ P(\sigma) = \frac{1}{Z} e^{-\beta E(\sigma)} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \beta = 1/T \) 是温度的倒数，\( Z \) 是配分函数：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ Z = \sum_{\sigma} e^{-\beta E(\sigma)} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这与统计物理中的玻尔兹曼-吉布斯分布完全相同，体现了神经网络与统计物理的深刻联系。
+                </p>
+                
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    玻尔兹曼机的动力学是随机的，神经元状态的更新遵循吉布斯采样规则。对于神经元 \( i \)，其状态更新为 \( \sigma_i = +1 \) 的概率为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ P(\sigma_i = +1 | \sigma_{\setminus i}) = \sigma\left(\beta \left( \sum_j w_{ij} \sigma_j + b_i \right)\right) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \sigma(x) = 1/(1+e^{-x}) \) 是sigmoid函数，\( \sigma_{\setminus i} \) 表示除了神经元 \( i \) 之外的所有神经元状态。
+                </p>
+                
+
+                
+                <h4 class="text-xl font-semibold text-gray-800 mt-6 mb-4">受限玻尔兹曼机（RBM）</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    受限玻尔兹曼机（RBM）是玻尔兹曼机的一个重要变种，它限制了网络中的连接，只允许可见层和隐藏层之间的连接，而同层内的神经元之间没有连接。这种结构限制使得RBM具有条件独立性，大大简化了计算。
+                </p>
+
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    RBM的能量函数为：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ E(\sigma, h) = -\sum_i b_i \sigma_i - \sum_j c_j h_j - \sum_{i,j} w_{ij} \sigma_i h_j \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \sigma_i \) 是可见层神经元的状态，\( h_j \) 是隐藏层神经元的状态，\( w_{ij} \) 是连接权重，\( b_i \) 和 \( c_j \) 分别是可见层和隐藏层的偏置。
+                </p>
+                
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    由于RBM的特殊结构，给定可见层状态，隐藏层神经元之间是条件独立的；同样，给定隐藏层状态，可见层神经元之间也是条件独立的。这一性质使得RBM的采样和学习变得可行。
+                </p>
+                
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从统计物理的角度看，RBM可以看作是一个二分图上的伊辛模型，其中可见层和隐藏层分别对应两种不同类型的自旋，而连接权重则对应自旋之间的耦合强度。这种类比使得我们可以利用统计物理的工具和思想来分析RBM的性质。
+                </p>
+                
+                <!-- RBM结构示意图 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">受限玻尔兹曼机（RBM）结构示意图</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="rbmStructureChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+
+                
+                <!-- 可折叠的受限玻尔兹曼机学习算法详细推导部分 -->
+                <button class="collapsible-header w-full text-left bg-purple-50 hover:bg-purple-100 text-purple-800 font-medium py-3 px-4 rounded-lg transition-colors flex justify-between items-center" onclick="toggleCollapsible('rbmLearning')">
+                    <span>点击展开受限玻尔兹曼机学习算法的详细推导（按论文原文）</span>
+                </button>
+                <div id="rbmLearning" class="collapsible-content bg-white border border-purple-100 rounded-b-lg px-4 py-2">
+                    <div class="py-4">
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            受限玻尔兹曼机（RBM）的学习算法基于最大似然估计。给定训练数据 \( \{\mathbf{v}^{(1)}, \mathbf{v}^{(2)}, ..., \mathbf{v}^{(M)}\} \)，我们希望最大化对数似然函数：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \mathcal{L}(\theta) = \sum_{m=1}^{M} \ln P(\mathbf{v}^{(m)}; \theta) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( \theta = \{w_{ij}, b_i, c_j\} \) 是模型参数，\( P(\mathbf{v}; \theta) \) 是可见层状态的边缘概率分布：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ P(\mathbf{v}) = \frac{1}{Z} \sum_{\mathbf{h}} e^{-E(\mathbf{v}, \mathbf{h})} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对数似然函数关于参数 \( w_{ij} \) 的梯度为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \frac{\partial \mathcal{L}}{\partial w_{ij}} = \sum_{m=1}^{M} \left\langle v_i h_j \right\rangle_{\mathbf{v}^{(m)}} - \left\langle v_i h_j \right\rangle_{P} \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( \left\langle \cdot \right\rangle_{\mathbf{v}^{(m)}} \) 表示在给定可见层状态 \( \mathbf{v}^{(m)} \) 时的条件期望，\( \left\langle \cdot \right\rangle_{P} \) 表示在模型分布 \( P(\mathbf{v}, \mathbf{h}) \) 下的期望。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            由于RBM的条件独立性，给定可见层状态 \( \mathbf{v} \)，隐藏层神经元的激活是独立的：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ P(h_j = 1 | \mathbf{v}) = \sigma\left(c_j + \sum_i v_i w_{ij}\right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            同样，给定隐藏层状态 \( \mathbf{h} \)，可见层神经元的激活也是独立的：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ P(v_i = 1 | \mathbf{h}) = \sigma\left(b_i + \sum_j h_j w_{ij}\right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            由于计算 \( \left\langle v_i h_j \right\rangle_{P} \) 涉及对所有可能的可见层和隐藏层状态求和，这在计算上是不可行的。这与统计物理中计算配分函数的困难性类似，被称为"配分函数难题"。为了解决这个问题，我们使用对比散度（CD）算法来近似这个期望。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            CD算法是一种蒙特卡洛方法，它使用吉布斯采样来近似模型分布的期望。具体来说，CD-k算法从训练数据开始，执行k步吉布斯采样，然后用采样结果来近似模型期望。论文中指出，即使是k=1的情况（CD-1），也能在实践中取得良好的效果。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            对于CD-1算法（k=1），权重更新规则为：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \Delta w_{ij} = \epsilon \left( \left\langle v_i h_j \right\rangle_{\mathbf{v}^{(m)}} - \left\langle v_i h_j \right\rangle_{\mathbf{v}'} \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            其中 \( \mathbf{v}' \) 是从 \( \mathbf{v}^{(m)} \) 经过一步吉布斯采样得到的重构可见层状态，\( \epsilon \) 是学习率。偏置的更新规则类似：
+                        </p>
+                        <div class="math-block">
+                            <p class="text-center">
+                                \[ \Delta b_i = \epsilon \left( v_i^{(m)} - \left\langle v_i \right\rangle_{\mathbf{v}'} \right) \]
+                                \[ \Delta c_j = \epsilon \left( \left\langle h_j \right\rangle_{\mathbf{v}^{(m)}} - \left\langle h_j \right\rangle_{\mathbf{v}'} \right) \]
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            这种学习算法可以看作是在可见层和隐藏层之间的"对比"，因此被称为对比散度。从统计物理的角度看，对比散度可以理解为在数据分布和模型分布之间寻找平衡，类似于统计物理中的平衡态概念。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            值得注意的是，RBM的学习过程可以看作是一种最大似然估计，这与统计物理中的变分推断方法有密切联系。在变分推断中，我们通过优化一个变分下界来近似难以计算的后验分布，这与RBM中使用对比散度来近似模型期望的思想是一致的。
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            CD算法在实践中表现良好，并且计算效率高，是训练RBM的标准方法。它的成功也体现了统计物理思想在神经网络中的应用价值。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 深度学习与大型语言模型 -->
+        <section id="deep-learning" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">深度学习与大型语言模型</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">深度学习与统计物理的联系</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    深度学习与统计物理之间存在深刻的概念联系，这种联系源于两者都关注复杂系统中从微观相互作用到宏观涌现行为的转变。根据论文笔记，深度学习可以被视为统计物理的一个应用领域，其中神经网络的训练过程对应于在高维能量景观上的随机动力学过程。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从历史发展来看，深度神经网络的早期工作，如Hinton等人提出的深度信念网络，直接受到统计物理模型（特别是玻尔兹曼机）的启发。这些模型通过逐层预训练来初始化网络权重，这一过程在统计物理中可以理解为在不同尺度上进行的重整化群变换。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    现代深度学习，尤其是大型语言模型，在工程实践中表现为三个关键要素的结合："端到端拟合 + 自回归生成 + 对齐与工具增强"。从统计物理的视角看，这些过程可以统一理解为：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>端到端拟合</strong>：对应于在高维参数空间中寻找能量最小值的过程，其中能量函数由损失函数定义</li>
+                    <li><strong>自回归生成</strong>：对应于在条件概率分布上的随机采样过程，类似于统计物理中的马尔可夫链蒙特卡洛方法</li>
+                    <li><strong>对齐与工具增强</strong>：对应于通过外部约束来塑造系统的能量景观，引导系统向特定的行为模式演化</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    统计物理为理解深度学习提供了丰富的概念框架，包括：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>能量景观理论</strong>：描述神经网络损失函数的高维地形，包括局部最小值、鞍点和能量壁垒</li>
+                    <li><strong>随机过程理论</strong>：分析随机梯度下降等优化算法的收敛性和动力学行为</li>
+                    <li><strong>相变理论</strong>：研究模型在训练过程中或在不同规模下的质变现象</li>
+                    <li><strong>临界现象</strong>：探索模型在临界点附近的标度行为和普适性</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这种跨学科的视角不仅有助于解释深度学习中的经验现象，还为设计更有效的算法和架构提供了理论指导。正如论文笔记中所强调的，统计物理的概念可以帮助我们理解为什么深度神经网络能够从简单的局部学习规则中产生复杂的全局行为。
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">深度学习的统计物理视角</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记强调，从统计物理的角度看，深度学习的核心可以理解为在高维概率空间中的分布匹配问题。设真实世界的数据分布为 \( p_{\text{data}}(x) \)，深度学习的目标是训练一个参数化模型 \( p_{\theta}(x) \) 来逼近这个分布。这种观点统一了分类、回归和生成等各种任务，将它们都视为某种形式的分布匹配问题。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    最基本的训练目标是极大似然估计（MLE）：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \max_{\theta} \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    利用信息论中的交叉熵分解，这等价于最小化KL散度 \( D_{KL}(p_{\text{data}} \| p_{\theta}) \)：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ D_{KL}(p_{\text{data}} \| p_{\theta}) = \mathbb{E}_{x \sim p_{\text{data}}} \log \frac{p_{\text{data}}(x)}{p_{\theta}(x)} = H(p_{\text{data}}) - \mathbb{E}_{x \sim p_{\text{data}}} \log p_{\theta}(x) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( H(p_{\text{data}}) \) 是数据分布的熵，与模型参数 \( \theta \) 无关。因此，最小化KL散度等价于最大化对数似然。论文笔记将这称为"深度学习的第一性原理"：训练就是在KL散度意义下逼近真实分布。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 能量景观理论</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    在统计物理中，神经网络的损失函数可以看作是一个高维能量函数 \( E(\theta) = -\log p_{\theta}(x) \)，而训练过程则对应于在这个能量景观上寻找最小值的过程。论文笔记指出，这个能量景观具有以下特点：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>高维性</strong>：对于具有数百万或数十亿参数的现代神经网络，能量景观是在超高维空间中定义的</li>
+                    <li><strong>非凸性</strong>：能量景观存在大量的局部最小值和鞍点</li>
+                    <li><strong>近似平坦性</strong>：在高维空间中，许多局部最小值的能量值非常接近，形成"能量谷"</li>
+                    <li><strong>随机性</strong>：由于训练数据的有限性和随机性，能量景观本身也具有随机特性</li>
+                </ul>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 随机梯度下降的统计物理解释</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    随机梯度下降（SGD）算法是训练神经网络的主要方法，从统计物理的角度看，它可以理解为一种Langevin动力学过程：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \theta_{t+1} = \theta_t - \eta \nabla E(\theta_t) + \sqrt{2\eta T} \cdot \xi_t \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \eta \) 是学习率，\( T \) 是"温度"参数，\( \xi_t \) 是高斯白噪声。这个方程描述了一个在能量景观上受噪声驱动的粒子的运动。学习率 \( \eta \) 控制步长，而噪声项则帮助系统逃离局部最小值。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记特别强调了学习率调度的重要性，将其比作退火过程：在训练初期使用较大的学习率（高温）允许系统在能量景观中广泛探索，然后逐渐减小学习率（降温）使系统收敛到某个局部最小值。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 反向传播的物理意义</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    反向传播算法是计算梯度的高效方法，从统计物理的角度看，它可以理解为在高维参数空间中计算能量梯度的链式法则应用。对于一个具有 \( L \) 层的神经网络，第 \( \ell \) 层的误差项 \( \delta^{(\ell)} \) 可以通过反向传播从第 \( \ell+1 \) 层的误差项计算得到：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \delta^{(\ell)} = ((W^{(\ell+1)})^T \delta^{(\ell+1)}) \odot \sigma'(z^{(\ell)}) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( \odot \) 表示元素级乘法，\( \sigma' \) 是激活函数的导数，\( z^{(\ell)} \) 是第 \( \ell \) 层的加权输入。从物理角度看，这相当于在参数空间中沿着梯度的负方向传播"误差信号"，类似于物理系统中的能量传递过程。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记还提到了梯度消失和梯度爆炸问题，这些问题可以理解为在深层网络中能量信号的衰减或放大现象，类似于物理中的信号传播问题。现代的激活函数（如ReLU）和归一化技术（如Batch Normalization）在一定程度上解决了这些问题，使更深的网络得以训练。
+
+                <!-- 神经网络训练过程图表 -->
+                <div class="mt-8 mb-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-3">神经网络训练过程中的损失函数变化</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <canvas id="trainingLossChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">大型语言模型的统计物理视角</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记特别强调了大型语言模型（LLMs）作为统计物理研究对象的重要性。这些模型具有数十亿甚至数千亿个参数，构成了极其复杂的非线性系统，为研究统计物理中的涌现现象提供了理想的实验平台。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. 神经热力学定律框架</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记详细介绍了"神经热力学定律"（Neural Thermodynamics Laws, NTL）框架，该框架将LLMs的训练动态与经典热力学原理联系起来。这一框架基于"河谷型损失景观"假设，即LLM的损失函数在高维参数空间中形成了一系列相互连接的河谷。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    在这一框架下，论文笔记指出，关键的热力学量和原理会自然地在LLM训练过程中浮现：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>温度</strong>：对应于训练过程中的学习率，控制系统的随机性</li>
+                    <li><strong>熵</strong>：反映模型参数或输出的不确定性</li>
+                    <li><strong>自由能</strong>：结合了能量（损失函数）和熵的综合度量</li>
+                    <li><strong>热容</strong>：描述模型对训练数据变化的敏感度</li>
+                    <li><strong>热传导</strong>：对应于梯度在网络各层之间的传递效率</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    更重要的是，论文笔记指出，经典的热力学定律在LLM训练中也有对应物：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>热力学第一定律</strong>：训练过程中的能量守恒，反映了参数更新与梯度之间的关系</li>
+                    <li><strong>热力学第二定律</strong>：训练过程中系统的熵增原理，解释了为什么模型会逐渐适应数据分布</li>
+                    <li><strong>热力学第三定律</strong>：当学习率趋近于零时，模型的行为趋近于确定性极限</li>
+                    <li><strong>能量均分定理</strong>：在训练充分的模型中，能量在不同参数之间的分布趋于均匀</li>
+                </ul>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. LLM推理的随机动力学模型</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记还介绍了将LLM的推理过程建模为连续时间随机动力系统的研究方向。研究人员使用随机微分方程（SDE）来描述模型内部状态的演化：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ dX_t = \mu(X_t, t) dt + \sigma(X_t, t) dW_t \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( X_t \) 表示模型在时间 \( t \) 的隐藏状态，\( \mu \) 是漂移项（反映确定性演化），\( \sigma \) 是扩散项（反映随机性），\( W_t \) 是维纳过程（布朗运动）。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这种建模方法能够捕捉LLM推理过程中的不同阶段和状态：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>对齐状态</strong>：模型输出与人类期望一致的状态</li>
+                    <li><strong>困惑状态</strong>：模型面临不确定性或矛盾信息时的状态</li>
+                    <li><strong>失败状态</strong>：模型产生错误或无意义输出的状态</li>
+                    <li><strong> regime切换</strong>：模型在不同状态之间的突然转变</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记强调，这种随机动力学视角为理解LLM的推理过程提供了新的洞见，特别是对于理解模型如何处理不确定性和生成连贯文本的机制。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 规模定律与临界现象</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记详细讨论了LLM中的规模定律（Scaling Laws），即模型性能随参数数量、训练数据量和计算量变化的规律。这些规模定律显示出明显的幂律特性，这在统计物理中通常与临界现象相关。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    具体来说，论文笔记指出以下几个重要的规模定律：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>参数规模定律</strong>：模型性能随参数数量的增加而提高，通常遵循幂律 \( L \propto N^\alpha \)，其中 \( \alpha \) 是一个常数</li>
+                    <li><strong>数据规模定律</strong>：模型性能随训练数据量的增加而提高，遵循类似的幂律形式</li>
+                    <li><strong>计算规模定律</strong>：训练模型所需的计算量与参数数量和数据量的乘积成正比</li>
+                    <li><strong>涌现能力的临界规模</strong>：某些能力仅在模型规模超过某个临界值时才会涌现</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记强调，这些规模定律的存在暗示了LLM可能在某个临界点附近表现出临界现象，类似于物理系统中的相变。理解这些临界现象可能是解开LLM涌现能力之谜的关键。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    正如论文笔记中引用的一位研究者所说："当数学函数被扩展到亿万维空间，它们似乎获得了'智能'，一种从规模中涌现出的新特性。"这种涌现现象的研究需要新的数学工具和跨学科的合作，而统计物理为这一研究提供了重要的理论基础。
+                </p>
+                
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">大型语言模型的统计物理视角</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    大型语言模型（LLMs）的出现为统计物理与深度学习的交叉研究提供了新的机遇。从统计物理的角度看，LLMs可以理解为在高维语言空间中运行的复杂系统，其行为可以用能量、熵、自由能等概念来描述。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    最近的研究提出了"神经热力学定律"（NTL）框架，该框架将LLMs的训练动态与经典热力学原理联系起来。在河谷型损失景观假设下，关键的热力学量（如温度、熵、热容、热传导）以及经典的热力学原理（如热力学三大定律和能量均分定理）会自然地在LLM训练过程中浮现。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    例如，训练过程中的学习率调度可以看作是温度的变化，而模型的熵则反映了其输出的不确定性。这些热力学视角不仅有助于理解LLM的训练动态，还为设计更有效的优化算法和学习率策略提供了指导。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    另一个有趣的研究方向是将LLM的推理过程建模为连续时间的随机动力系统。研究人员使用随机微分方程（SDE）来描述句子级隐藏状态的演化，其中包含漂移项、扩散项和潜在的regime切换。这种方法能够捕捉不同的推理阶段，包括对齐状态或失败情况。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这些研究表明，统计物理为理解LLM的内部工作机制提供了强大的理论工具，有望揭示智能涌现的基本原理。正如一位研究者所说："当数学函数被扩展到亿万维空间，它们似乎获得了'智能'，一种从规模中涌现出的新特性。"理解这种涌现现象需要新的数学工具和跨学科的合作。
+
+                <h3 class="text-2xl font-semibold text-gray-800 mt-8 mb-4">大型语言模型：架构与训练</h3>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记详细介绍了大型语言模型（LLMs）的基本架构和训练方法，将其视为统计物理研究的重要对象。LLMs通常具有数十亿甚至数千亿个参数，通过在海量文本数据上进行预训练，能够生成连贯、上下文相关的文本。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">1. Transformer架构的统计物理视角</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    LLM的核心是基于自注意力机制的Transformer架构。从统计物理的角度看，自注意力机制可以理解为一种计算序列中不同位置之间相关性的机制，类似于物理系统中粒子之间的相互作用。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    具体来说，自注意力机制计算查询（Query）、键（Key）和值（Value）之间的关系：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从物理角度看，这一过程可以理解为：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>能量计算</strong>：查询和键的点积可以看作是计算"能量"或"兼容性"的过程</li>
+                    <li><strong>归一化</strong>：softmax操作类似于统计物理中的玻尔兹曼分布，将能量转换为概率</li>
+                    <li><strong>信息聚合</strong>：加权求和过程类似于物理中的平均场近似，将局部信息聚合为全局表示</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记特别强调了多头注意力机制的重要性，认为它允许模型同时捕捉不同类型的相关性，类似于物理中考虑多种相互作用的情况。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">2. 预训练与微调的统计物理解释</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    LLM的训练通常分为两个阶段：预训练和微调。论文笔记从统计物理的角度对这两个阶段进行了解释：
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>预训练阶段</strong>：模型在海量文本数据上学习语言的统计规律，目标是最小化下一个词预测的交叉熵损失：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \mathcal{L}_{\text{pretrain}} = -\mathbb{E}_{(w_1, w_2, ..., w_T)} \sum_{t=1}^{T} \log P(w_t | w_1, ..., w_{t-1}; \theta) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从物理角度看，这一过程相当于让模型在语言的"能量景观"中寻找最低点，学习语言的统计结构。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    <strong>微调阶段</strong>：预训练后的模型在特定任务或数据集上进行微调，以适应特定的应用场景：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ \mathcal{L}_{\text{finetune}} = \mathcal{L}_{\text{pretrain}} + \lambda \mathcal{L}_{\text{task}} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从物理角度看，这相当于在原始能量景观上添加一个额外的"势能项"，引导模型向特定的行为模式演化。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">3. 自回归生成的随机过程视角</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    LLM的生成过程是自回归的，即逐个生成文本标记。从统计物理的角度看，这一过程可以理解为在条件概率分布上的随机游走：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ P(w_t | w_1, w_2, ..., w_{t-1}) = \text{softmax}(z_t) \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    其中 \( z_t \) 是模型的输出分数，softmax函数将这些分数转换为概率分布。
+                </p>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记指出，生成过程中的温度参数 \( T \) 控制着输出的随机性：
+                </p>
+                <div class="math-block">
+                    <p class="text-center">
+                        \[ P(w_t | w_1, ..., w_{t-1}) = \frac{\exp(z_t / T)}{\sum_{w'} \exp(z_{w'} / T)} \]
+                    </p>
+                </div>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    从物理角度看，这相当于调整系统的温度，控制系统的无序程度：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>高温度（\( T \gg 1 \)）</strong>：输出更加随机和多样化，但可能缺乏连贯性</li>
+                    <li><strong>低温度（\( T \ll 1 \)）</strong>：输出更加确定和保守，倾向于选择最可能的标记</li>
+                    <li><strong>临界温度</strong>：在某个临界温度附近，可能出现复杂的涌现行为</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记强调，这种温度控制机制为研究LLM的生成行为提供了重要的工具，类似于物理中通过控制温度来研究系统的相变和临界现象。
+                </p>
+                
+                <h4 class="text-xl font-medium text-gray-800 mt-6 mb-3">4. 对齐与工具增强的物理意义</h4>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    现代LLM通常通过对齐技术（如RLHF）和工具增强来提高其效用和安全性。论文笔记从统计物理的角度对这些技术进行了解释：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li><strong>强化学习人类反馈（RLHF）</strong>：相当于在能量景观中添加一个由人类偏好定义的势能项，引导模型向人类期望的方向演化</li>
+                    <li><strong>工具增强</strong>：相当于扩展模型的状态空间，允许模型与外部工具交互，从而改变其能量景观的结构</li>
+                    <li><strong>检索增强</strong>：相当于在模型的能量计算中引入外部信息源，改变模型的概率分布</li>
+                    <li><strong>多模态融合</strong>：相当于将不同模态的能量景观合并，创建更复杂的联合表示</li>
+                </ul>
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    论文笔记强调，这些技术不仅提高了LLM的实用性，也为研究复杂系统的适应性和学习提供了重要的实验平台。从统计物理的角度理解这些技术，可能为设计更有效的对齐和增强方法提供新的思路。
+            </div>
+        </section>
+
+        <!-- 总结与展望 -->
+        <section id="conclusion" class="max-w-4xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">总结与展望</h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    这篇讲座笔记成功地将统计物理的概念与神经网络和深度学习联系起来，为理解这两个领域的交叉提供了宝贵的视角。主要贡献包括：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 mb-6">
+                    <li>以概率论和统计学为基础介绍统计物理，使没有物理学背景的读者也能理解相变和重整化群等概念</li>
+                    <li>详细讲解了伊辛模型和自旋玻璃模型，以及它们与霍普菲尔德网络和玻尔兹曼机的联系</li>
+                    <li>介绍了受限玻尔兹曼机的学习算法，其中隐藏神经元的积分过程类似于重整化群</li>
+                    <li>讨论了现代深度学习和大型语言模型的基础，展示了统计物理概念在AI中的应用</li>
+                </ul>
+
+                <p class="text-gray-700 leading-relaxed mb-4">
+                    展望未来，统计物理与神经网络的交叉研究有望在以下方面取得进展：
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700">
+                    <li>深入理解深度学习中的相变现象，如神经网络在训练过程中的性能突变</li>
+                    <li>应用重整化群思想来分析和设计更高效的神经网络架构</li>
+                    <li>探索大型语言模型中的涌现现象，从统计物理角度理解模型如何从简单规则中产生复杂行为</li>
+                    <li>开发基于统计物理的新优化算法，提高神经网络训练的效率和稳定性</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold mb-2">统计物理与神经网络</h3>
+                    <p class="text-gray-400">讲座笔记分析与可视化</p>
+                </div>
+                <div class="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
+                    <a href="#introduction" class="text-gray-400 hover:text-white transition-colors">引言</a>
+                    <a href="#statistical-physics" class="text-gray-400 hover:text-white transition-colors">统计物理基础</a>
+                    <a href="#renormalization" class="text-gray-400 hover:text-white transition-colors">重整化群</a>
+                    <a href="#boltzmann-machines" class="text-gray-400 hover:text-white transition-colors">玻尔兹曼机</a>
+                    <a href="#deep-learning" class="text-gray-400 hover:text-white transition-colors">深度学习</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2026 统计物理与神经网络研究报告</p>
+                <p class="mt-2">基于 Olaf Hohm 的讲座笔记</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 如果是移动端，点击后关闭菜单
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // 伊辛模型相变图表
+        const isingCtx = document.getElementById('isingPhaseChart').getContext('2d');
+        const isingChart = new Chart(isingCtx, {
+            type: 'line',
+            data: {
+                labels: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4],
+                datasets: [{
+                    label: '磁化强度 (T < Tc)',
+                    data: [0.95, 0.90, 0.80, 0.65, 0.45, 0.25, 0.10, 0.05, 0],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: '磁化强度 (T > Tc)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderDash: [5, 5],
+                    tension: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '二维伊辛模型的磁化强度随温度变化',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '温度 (T/Tc)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '磁化强度 (m)'
+                        },
+                        min: 0,
+                        max: 1,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // RG流图表
+        const rgFlowCtx = document.getElementById('rgFlowChart').getContext('2d');
+        const rgFlowChart = new Chart(rgFlowCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'RG流',
+                    data: [
+                        {x: 0.1, y: 0.01},
+                        {x: 0.15, y: 0.02},
+                        {x: 0.2, y: 0.04},
+                        {x: 0.25, y: 0.06},
+                        {x: 0.3, y: 0.09},
+                        {x: 0.33, y: 0.11},
+                        {x: 0.35, y: 0.12},
+                        {x: 0.38, y: 0.14},
+                        {x: 0.4, y: 0.16}
+                    ],
+                    borderColor: 'rgb(139, 92, 246)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.5)',
+                    pointRadius: 5
+                }, {
+                    label: '固定点',
+                    data: [
+                        {x: 0, y: 0},
+                        {x: 0.333, y: 0.111}
+                    ],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    pointRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '二维伊辛模型的RG流',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'K (最近邻耦合)'
+                        },
+                        min: 0,
+                        max: 0.5,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'L (次近邻耦合)'
+                        },
+                        min: 0,
+                        max: 0.2,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 霍普菲尔德网络示意图
+        const hopfieldCtx = document.getElementById('hopfieldNetworkChart').getContext('2d');
+        const hopfieldChart = new Chart(hopfieldCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '神经元',
+                    data: [
+                        {x: 1, y: 3},
+                        {x: 2, y: 4},
+                        {x: 3, y: 4},
+                        {x: 4, y: 3},
+                        {x: 2, y: 2},
+                        {x: 3, y: 2},
+                        {x: 1, y: 1},
+                        {x: 4, y: 1}
+                    ],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    pointRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '霍普菲尔德网络的全连接结构',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [{
+                id: 'connections',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const data = chart.data.datasets[0].data;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+                    ctx.lineWidth = 1;
+                    
+                    // 绘制所有神经元之间的连接
+                    for (let i = 0; i < data.length; i++) {
+                        for (let j = i + 1; j < data.length; j++) {
+                            const x1 = chart.scales.x.getPixelForValue(data[i].x);
+                            const y1 = chart.scales.y.getPixelForValue(data[i].y);
+                            const x2 = chart.scales.x.getPixelForValue(data[j].x);
+                            const y2 = chart.scales.y.getPixelForValue(data[j].y);
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(x1, y1);
+                            ctx.lineTo(x2, y2);
+                            ctx.stroke();
+                        }
+                    }
+                    ctx.restore();
+                }
+            }]
+        });
+
+        // RBM结构图表
+        const rbmCtx = document.getElementById('rbmStructureChart').getContext('2d');
+        const rbmChart = new Chart(rbmCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '可见层神经元',
+                    data: [
+                        {x: 1, y: 1},
+                        {x: 2, y: 1},
+                        {x: 3, y: 1},
+                        {x: 4, y: 1}
+                    ],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    pointRadius: 10
+                }, {
+                    label: '隐藏层神经元',
+                    data: [
+                        {x: 1.5, y: 3},
+                        {x: 3, y: 3},
+                        {x: 4.5, y: 3}
+                    ],
+                    borderColor: 'rgb(139, 92, 246)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    pointRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '受限玻尔兹曼机（RBM）的二分图结构',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 6,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 5,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [{
+                id: 'rbmConnections',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const visibleData = chart.data.datasets[0].data;
+                    const hiddenData = chart.data.datasets[1].data;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(107, 114, 128, 0.5)';
+                    ctx.lineWidth = 1.5;
+                    
+                    // 绘制可见层和隐藏层之间的连接
+                    visibleData.forEach(visiblePoint => {
+                        const x1 = chart.scales.x.getPixelForValue(visiblePoint.x);
+                        const y1 = chart.scales.y.getPixelForValue(visiblePoint.y);
+                        
+                        hiddenData.forEach(hiddenPoint => {
+                            const x2 = chart.scales.x.getPixelForValue(hiddenPoint.x);
+                            const y2 = chart.scales.y.getPixelForValue(hiddenPoint.y);
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(x1, y1);
+                            ctx.lineTo(x2, y2);
+                            ctx.stroke();
+                        });
+                    });
+                    
+                    ctx.restore();
+                }
+            }]
+        });
+
+        // 神经网络训练损失图表
+        const lossCtx = document.getElementById('trainingLossChart').getContext('2d');
+        const lossChart = new Chart(lossCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 101}, (_, i) => i),
+                datasets: [{
+                    label: '训练损失',
+                    data: [
+                        5.0, 4.2, 3.6, 3.1, 2.7, 2.4, 2.1, 1.9, 1.7, 1.5,
+                        1.4, 1.3, 1.2, 1.1, 1.0, 0.95, 0.90, 0.85, 0.81, 0.77,
+                        0.74, 0.71, 0.68, 0.65, 0.63, 0.61, 0.59, 0.57, 0.55, 0.53,
+                        0.52, 0.50, 0.49, 0.48, 0.47, 0.46, 0.45, 0.44, 0.43, 0.42,
+                        0.41, 0.40, 0.39, 0.38, 0.37, 0.37, 0.36, 0.35, 0.35, 0.34,
+                        0.33, 0.33, 0.32, 0.32, 0.31, 0.31, 0.30, 0.30, 0.29, 0.29,
+                        0.28, 0.28, 0.28, 0.27, 0.27, 0.26, 0.26, 0.26, 0.25, 0.25,
+                        0.25, 0.24, 0.24, 0.24, 0.23, 0.23, 0.23, 0.22, 0.22, 0.22,
+                        0.22, 0.21, 0.21, 0.21, 0.20, 0.20, 0.20, 0.20, 0.19, 0.19,
+                        0.19, 0.19, 0.18, 0.18, 0.18, 0.18, 0.17, 0.17, 0.17, 0.17, 0.16
+                    ],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: '验证损失',
+                    data: [
+                        5.1, 4.3, 3.7, 3.2, 2.8, 2.5, 2.2, 2.0, 1.8, 1.6,
+                        1.5, 1.4, 1.3, 1.2, 1.1, 1.05, 1.0, 0.96, 0.92, 0.88,
+                        0.85, 0.82, 0.80, 0.78, 0.76, 0.74, 0.72, 0.71, 0.69, 0.68,
+                        0.67, 0.66, 0.65, 0.64, 0.63, 0.62, 0.61, 0.61, 0.60, 0.59,
+                        0.59, 0.58, 0.58, 0.57, 0.57, 0.56, 0.56, 0.55, 0.55, 0.55,
+                        0.54, 0.54, 0.54, 0.53, 0.53, 0.53, 0.52, 0.52, 0.52, 0.52,
+                        0.51, 0.51, 0.51, 0.51, 0.50, 0.50, 0.50, 0.50, 0.50, 0.49,
+                        0.49, 0.49, 0.49, 0.49, 0.48, 0.48, 0.48, 0.48, 0.48, 0.48,
+                        0.47, 0.47, 0.47, 0.47, 0.47, 0.47, 0.47, 0.46, 0.46, 0.46,
+                        0.46, 0.46, 0.46, 0.46, 0.46, 0.45, 0.45, 0.45, 0.45, 0.45, 0.45
+                    ],
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '神经网络训练过程中的损失函数变化',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '训练轮次 (Epoch)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(0);
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '损失值 (Loss)'
+                        },
+                        min: 0,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 一维伊辛模型磁化强度图表
+        const ising1DCtx = document.getElementById('ising1DMagnetizationChart').getContext('2d');
+        
+        // 生成数据点
+        const generateMagnetizationData = (betaJ) => {
+            const hValues = Array.from({length: 101}, (_, i) => -5 + i * 0.1);
+            const mValues = hValues.map(h => {
+                const betaH = h;
+                return Math.sinh(betaH) / Math.sqrt(Math.sinh(betaH) ** 2 + Math.exp(-4 * betaJ));
+            });
+            return {h: hValues, m: mValues};
+        };
+        
+        const data1 = generateMagnetizationData(0.5); // 弱耦合
+        const data2 = generateMagnetizationData(1.0); // 中等耦合
+        const data3 = generateMagnetizationData(2.0); // 强耦合
+        
+        const ising1DChart = new Chart(ising1DCtx, {
+            type: 'line',
+            data: {
+                labels: data1.h,
+                datasets: [{
+                    label: 'βJ = 0.5 (弱耦合)',
+                    data: data1.m,
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'βJ = 1.0 (中等耦合)',
+                    data: data2.m,
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'βJ = 2.0 (强耦合)',
+                    data: data3.m,
+                    borderColor: 'rgb(139, 92, 246)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '一维伊辛模型的磁化强度随外磁场变化',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '外磁场 (βh)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '磁化强度 (m)'
+                        },
+                        min: -1,
+                        max: 1,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 自旋玻璃模型受挫现象图表
+        const spinGlassFrustrationCtx = document.getElementById('spinGlassFrustrationChart').getContext('2d');
+        const spinGlassFrustrationChart = new Chart(spinGlassFrustrationCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '自旋向上',
+                    data: [
+                        {x: 1, y: 1},
+                        {x: 3, y: 1},
+                        {x: 3, y: 3}
+                    ],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    pointRadius: 15
+                }, {
+                    label: '自旋向下',
+                    data: [
+                        {x: 1, y: 3}
+                    ],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    pointRadius: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '自旋玻璃模型中的受挫现象示意图',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 4,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 4,
+                        ticks: {
+                            display: false
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                }
+            },
+            plugins: [{
+                id: 'frustration',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const data = chart.data.datasets;
+                    ctx.save();
+                    
+                    // 绘制边和耦合强度
+                    // 铁磁性边 (J > 0)
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.8)';
+                    ctx.lineWidth = 3;
+                    
+                    // 边 (1,1)-(3,1)
+                    ctx.beginPath();
+                    ctx.moveTo(chart.scales.x.getPixelForValue(1), chart.scales.y.getPixelForValue(1));
+                    ctx.lineTo(chart.scales.x.getPixelForValue(3), chart.scales.y.getPixelForValue(1));
+                    ctx.stroke();
+                    
+                    // 边 (3,1)-(3,3)
+                    ctx.beginPath();
+                    ctx.moveTo(chart.scales.x.getPixelForValue(3), chart.scales.y.getPixelForValue(1));
+                    ctx.lineTo(chart.scales.x.getPixelForValue(3), chart.scales.y.getPixelForValue(3));
+                    ctx.stroke();
+                    
+                    // 反铁磁性边 (J < 0)
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+                    ctx.setLineDash([5, 3]);
+                    
+                    // 边 (1,1)-(1,3)
+                    ctx.beginPath();
+                    ctx.moveTo(chart.scales.x.getPixelForValue(1), chart.scales.y.getPixelForValue(1));
+                    ctx.lineTo(chart.scales.x.getPixelForValue(1), chart.scales.y.getPixelForValue(3));
+                    ctx.stroke();
+                    
+                    // 边 (1,3)-(3,3)
+                    ctx.beginPath();
+                    ctx.moveTo(chart.scales.x.getPixelForValue(1), chart.scales.y.getPixelForValue(3));
+                    ctx.lineTo(chart.scales.x.getPixelForValue(3), chart.scales.y.getPixelForValue(3));
+                    ctx.stroke();
+                    
+                    // 标记耦合强度
+                    ctx.font = '16px Arial';
+                    ctx.fillStyle = 'rgba(16, 185, 129, 1)';
+                    ctx.fillText('J=+1', (chart.scales.x.getPixelForValue(1) + chart.scales.x.getPixelForValue(3)) / 2, chart.scales.y.getPixelForValue(0.8));
+                    ctx.fillText('J=+1', chart.scales.x.getPixelForValue(3.2), (chart.scales.y.getPixelForValue(1) + chart.scales.y.getPixelForValue(3)) / 2);
+                    
+                    ctx.fillStyle = 'rgba(239, 68, 68, 1)';
+                    ctx.fillText('J=-1', chart.scales.x.getPixelForValue(0.8), (chart.scales.y.getPixelForValue(1) + chart.scales.y.getPixelForValue(3)) / 2);
+                    ctx.fillText('J=-1', (chart.scales.x.getPixelForValue(1) + chart.scales.x.getPixelForValue(3)) / 2, chart.scales.y.getPixelForValue(3.2));
+                    
+                    // 标记受挫的边
+                    ctx.fillStyle = 'rgba(245, 158, 11, 1)';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText('受挫!', (chart.scales.x.getPixelForValue(1) + chart.scales.x.getPixelForValue(3)) / 2, (chart.scales.y.getPixelForValue(1) + chart.scales.y.getPixelForValue(3)) / 2);
+                    
+                    ctx.restore();
+                }
+            }]
+        });
+
+        // 切换可折叠内容的函数
+        function toggleCollapsible(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            content.classList.toggle('collapsible-active');
+            header.classList.toggle('collapsible-header-active');
+            
+            // 保存状态到localStorage
+            const isActive = content.classList.contains('collapsible-active');
+            localStorage.setItem(`collapsible_${id}`, isActive);
+        }
+        
+        // 页面加载时恢复可折叠内容的状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const collapsibles = document.querySelectorAll('.collapsible-content');
+            collapsibles.forEach(collapsible => {
+                const id = collapsible.id;
+                const isActive = localStorage.getItem(`collapsible_${id}`) === 'true';
+                if (isActive) {
+                    collapsible.classList.add('collapsible-active');
+                    collapsible.previousElementSibling.classList.add('collapsible-header-active');
+                }
+            });
+        });
+
+        // 页面滚动时的动画效果
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.card-hover');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementBottom = element.getBoundingClientRect().bottom;
+                const isVisible = elementTop < window.innerHeight && elementBottom > 0;
+                
+                if (isVisible) {
+                    element.classList.add('animate-fade-in');
+                }
+            });
+        };
+
+        // 初始加载时执行一次
+        window.addEventListener('load', animateOnScroll);
+        // 滚动时执行
+        window.addEventListener('scroll', animateOnScroll);
+    </script>
+</body>
+</html>
